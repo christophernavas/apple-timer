@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import useTimerStore from "./store/timerStore";
-import { X, Play, Pause, Bell } from "lucide-react";
+import { X, Play, Pause, Bell, RotateCcw } from "lucide-react";
 import useTimerForm from "./hooks/useTimerForm";
 import useTimer from "./hooks/useTimer";
+import CircularProgress from "./components/CircularProgress";
 
 const TimerForm = () => {
   const { timerForm, handleSetForm, formatAndAddTimer } = useTimerForm();
@@ -69,38 +70,13 @@ const Timer = ({ timer }) => {
   const { removeTimer, formattedTime, hrs, mins, secs, formattedLeftTime } =
     useTimer(timer);
   const updateTimerField = useTimerStore((store) => store.updateTimerField);
-  const convertTimeToSeconds = (timeString) => {
-    const [hrs, mins, secs] = timeString.split(":").map(Number);
-    return hrs * 3600 + mins * 60 + secs;
-  };
 
   return (
     <div className="card flex rounded-3xl bg-base-200 max-w-xs mx-auto w-full h-full aspect-square relative">
-      <svg
-        width="100%"
-        height="100%"
-        className="absolute text-primary top-0 left-0"
-      >
-        <circle
-          cx="50%"
-          cy="50%"
-          r="90"
-          stroke="currentColor"
-          strokeWidth="5"
-          fill="none"
-        />
-        <circle
-          cx="50%"
-          cy="50%"
-          r="90"
-          stroke="lightgray"
-          strokeWidth="5"
-          fill="none"
-          strokeDasharray={`${convertTimeToSeconds(formattedLeftTime)} ${
-            timer.duration
-          }`}
-        />
-      </svg>
+      <CircularProgress
+        duration={timer.duration}
+        timeLeft={formattedLeftTime}
+      />
       <div className="flex m-auto items-center flex-col">
         <div className="flex items-center gap-2">
           <Bell size={13} /> {formattedTime}
@@ -119,19 +95,30 @@ const Timer = ({ timer }) => {
         >
           <X size={20} />
         </button>
-        {timer.isRunning ? (
-          <button
-            onClick={() => updateTimerField(timer.id, { isRunning: false })}
-            className="btn btn-sm btn-primary btn-circle"
-          >
-            <Pause size={20} />
-          </button>
+        {timer.timeLeft > 0 ? (
+          timer.isRunning ? (
+            <button
+              onClick={() => updateTimerField(timer.id, { isRunning: false })}
+              className="btn btn-sm btn-primary btn-circle"
+            >
+              <Pause size={20} />
+            </button>
+          ) : (
+            <button
+              onClick={() => updateTimerField(timer.id, { isRunning: true })}
+              className="btn btn-sm btn-success btn-circle"
+            >
+              <Play size={20} />
+            </button>
+          )
         ) : (
           <button
-            onClick={() => updateTimerField(timer.id, { isRunning: true })}
+            onClick={() =>
+              updateTimerField(timer.id, { timeLeft: timer.initTimeLeft })
+            }
             className="btn btn-sm btn-success btn-circle"
           >
-            <Play size={20} />
+            <RotateCcw size={20} />
           </button>
         )}
       </div>

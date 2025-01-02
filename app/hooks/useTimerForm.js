@@ -24,6 +24,7 @@ const useTimerForm = () => {
       id: Date.now().toString(),
       duration: totalSeconds * 1000,
       timeLeft: totalSeconds,
+      initTimeLeft: totalSeconds,
       endAt: Date.now() + totalSeconds * 1000,
       isRunning: true,
     };
