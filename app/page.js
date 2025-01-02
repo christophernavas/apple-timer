@@ -1,101 +1,120 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import useTimerStore from "./store/timerStore";
+import { X, Play, Pause, Bell } from "lucide-react";
+import useTimerForm from "./hooks/useTimerForm";
+import useTimer from "./hooks/useTimer";
+
+const TimerForm = () => {
+  const { timerForm, handleSetForm, formatAndAddTimer } = useTimerForm();
+
+  return (
+    <div className="mx-auto flex w-fit flex-col gap-4">
+      <div className="flex items-center justify-between ">
+        <p className="flex-1 text-center text-neutral-content">hr</p>
+        <p className="flex-1 text-center text-neutral-content">min</p>
+        <p className="flex-1 text-center text-neutral-content">sec</p>
+      </div>
+      <div className="flex items-center rounded-md border border-neutral bg-base-200 p-2">
+        <input
+          className="h-24 w-20 rounded-md bg-base-200 text-center text-5xl focus:bg-accent focus:text-accent-content focus:outline-none md:h-20 md:w-32 md:text-6xl lg:h-32 lg:w-40 lg:text-8xl"
+          name="hrs"
+          onChange={handleSetForm}
+          maxLength={2} // Limite à 2 caractères
+          value={timerForm.hrs}
+          pattern="\d*" // N'autorise que les chiffres
+        />
+        <p className="text-lg">:</p>
+        <input
+          className="h-24 w-20 rounded-md bg-base-200 text-center text-5xl focus:bg-accent focus:text-accent-content focus:outline-none md:h-20 md:w-32 md:text-6xl lg:h-32 lg:w-40 lg:text-8xl"
+          name="mins"
+          onChange={handleSetForm}
+          maxLength={2} // Limite à 2 caractères
+          value={timerForm.mins}
+          pattern="\d*" // N'autorise que les chiffres
+        />
+        <p className="text-lg">:</p>
+        <input
+          className="h-24 w-20 rounded-md bg-base-200 text-center text-5xl focus:bg-accent focus:text-accent-content focus:outline-none md:h-20 md:w-32 md:text-6xl lg:h-32 lg:w-40 lg:text-8xl"
+          name="secs"
+          onChange={handleSetForm}
+          maxLength={2} // Limite à 2 caractères
+          value={timerForm.secs}
+          pattern="\d*" // N'autorise que les chiffres
+        />
+      </div>
+      <div className="flex justify-end gap-4">
+        <button className="btn btn-success" onClick={formatAndAddTimer}>
+          Add Timer
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const Timer = ({ timer }) => {
+  const { removeTimer, formattedTime, hrs, mins, secs, formattedLeftTime } =
+    useTimer(timer);
+  const updateTimerField = useTimerStore((store) => store.updateTimerField);
+  console.log(timer);
+
+  return (
+    <div className="card flex rounded-3xl bg-base-200 p-5 w-full h-full aspect-square">
+      <div className="flex m-auto items-center flex-col">
+        <div className="flex items-center gap-2">
+          <Bell size={13} /> {formattedTime}
+        </div>
+        <div className="text-3xl">{formattedLeftTime}</div>
+        <p>
+          {`${hrs !== "00" ? `${hrs} h ` : ""}
+          ${mins !== "00" ? `${mins} min ` : ""}
+          ${secs !== "00" ? `${secs} s` : ""}`.trim()}
+        </p>
+      </div>
+      <div className="mt-auto flex justify-between">
+        <button
+          className="btn btn-sm btn-base-300 btn-circle"
+          onClick={() => removeTimer(timer.id)}
+        >
+          <X size={20} />
+        </button>
+        {timer.isRunning ? (
+          <button
+            onClick={() => updateTimerField(timer.id, { isRunning: false })}
+            className="btn btn-sm btn-primary btn-circle"
+          >
+            <Pause size={20} />
+          </button>
+        ) : (
+          <button
+            onClick={() => updateTimerField(timer.id, { isRunning: true })}
+            className="btn btn-sm btn-success btn-circle"
+          >
+            <Play size={20} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const timers = useTimerStore((store) => store.timers);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <div className="mx-auto flex min-h-full max-w-3xl flex-col gap-8 p-4">
+      <h1 className="mx-auto w-fit rounded-md bg-base-200 px-4 py-2 text-lg font-bold text-base-content">
+        Timer
+      </h1>
+      <TimerForm />
+      {timers ? (
+        <div className="grid grid-cols-3 gap-6">
+          {timers.map((timer) => (
+            <Timer key={timer.id} timer={timer} />
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ) : null}
     </div>
   );
 }
