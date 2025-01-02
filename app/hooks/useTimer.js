@@ -6,7 +6,13 @@ const useTimer = (timer) => {
   const updateTimerField = useTimerStore((store) => store.updateTimerField); // Récupération de la fonction updateTimerField
 
   useEffect(() => {
-    if (!timer.isRunning || timer.timeLeft <= 0) return;
+    if (!timer.isRunning || timer.timeLeft <= 0) {
+      if (timer.timeLeft === 0) {
+        const audio = new Audio("/ring.mp3"); // Chemin vers le fichier audio dans le répertoire public
+        audio.play();
+      }
+      return;
+    }
 
     const intervalId = setInterval(() => {
       updateTimerField(timer.id, { timeLeft: timer.timeLeft - 1 }); // Mise à jour de timeLeft
